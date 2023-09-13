@@ -1,0 +1,28 @@
+name: Require Checklist
+
+on:
+  pull_request:
+    types: opened
+
+jobs:
+  review-checklist:
+    permissions: write-all
+    name: Make validation comment on PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Make validation comment"
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Review Checklist
+            - [ ] Documentation updated`,
+            })
+
+  tasks-check:
+    name: Check tasks
+    uses: ./.github/workflows/tasks-check
