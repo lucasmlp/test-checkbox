@@ -1,0 +1,15 @@
+name: Tasks Check
+
+on:
+  workflow_call:
+
+jobs:
+  checkbox-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check checkboxes
+      uses: mheap/require-checklist-action@v2
+      with:
+        requireChecklist: false # If this is true and there are no checklists detected, the action will fail
+        token: ${{ secrets.GITHUB_TOKEN }}
+        issueNumber: ${{ github.event.client_payload.issue.number }}
