@@ -1,0 +1,15 @@
+name: Tasks Check Trigger
+
+on:
+  workflow_call:
+  pull_request:
+    types: [opened, synchronize]
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  tasks-check:
+    # Ensure it's a PR and not just an issue
+    if: (github.event.issue.pull_request != null && github.event_name == 'issue_comment') || github.event_name == 'pull_request'
+    name: Check tasks
+    uses: ./.github/workflows/task-check.yaml
