@@ -2,6 +2,7 @@ name: Require Checklist
 
 on:
   workflow_dispatch:
+  workflow_call:
   issue_comment:
     types: [edited]
 
