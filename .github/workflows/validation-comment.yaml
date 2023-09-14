@@ -4,6 +4,7 @@ on:
   pull_request:
     types: opened
 
+
 jobs:
   review-checklist:
     permissions: write-all
@@ -25,4 +26,5 @@ jobs:
 
   tasks-check:
     name: Check tasks
-    uses: ./.github/workflows/task-check.yaml
+    needs: review-checklist
+    uses: ./.github/workflows/tasks-check.yaml
