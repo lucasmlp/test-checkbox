@@ -1,0 +1,19 @@
+name: Tasks Check
+
+on:
+  workflow_call:
+  pull_request:
+    types: [opened, synchronize]
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  checkbox-check:
+    # Ensure it's a PR and not just an issue
+    if: (github.event.issue.pull_request != null && github.event_name == 'issue_comment') || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check checkboxes
+      uses: mheap/require-checklist-action@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
