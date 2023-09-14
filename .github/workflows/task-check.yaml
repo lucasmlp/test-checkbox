@@ -9,6 +9,7 @@ on:
 jobs:
   check-tasks:
     runs-on: ubuntu-latest
+    if: ${{ github.event.issue.pull_request }}
     steps:
       - uses: mheap/require-checklist-action@v2
         with:
