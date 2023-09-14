@@ -1,0 +1,10 @@
+name: Tasks Check Trigger
+
+on:
+  pull_request_review:
+    types: approved
+
+jobs:
+  tasks-check:
+    name: Check tasks
+    uses: ./.github/workflows/tasks-check.yaml
