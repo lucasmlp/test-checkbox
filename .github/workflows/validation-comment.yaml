@@ -25,4 +25,4 @@ jobs:
 
   tasks-check:
     name: Check tasks
-    uses: ./.github/workflows/task-check.yaml
+    uses: ./.github/workflows/tasks-check.yaml
