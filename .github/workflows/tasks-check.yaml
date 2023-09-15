@@ -1,0 +1,13 @@
+name: Tasks Check
+
+on:
+  workflow_call:
+
+jobs:
+  checkbox-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check checkboxes
+      uses: mheap/require-checklist-action@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
