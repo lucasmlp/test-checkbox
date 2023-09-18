@@ -2,6 +2,9 @@ name: Require Checklist
 
 on:
   workflow_call:
+  pull_request:
+    types: 
+      - opened
 
 jobs:
   review-checklist:
