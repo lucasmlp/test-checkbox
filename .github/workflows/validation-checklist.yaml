@@ -11,24 +11,7 @@ on:
 
 jobs:
   review-checklist:
-    # Only run this job if the workflow was triggered by a pull request being opened
-    if: github.event_name == 'pull_request' && github.event.action == 'opened'
-    permissions: write-all
-    name: Make validation comment on PR
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Make validation comment"
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `### Review Checklist
-            - [ ] Documentation updated`,
-            })
+    uses: ./.github/workflows/review-checklist.yaml
 
   tasks-check:
     name: Check tasks
