@@ -5,19 +5,28 @@ on:
     types: [edited]
 
 jobs:
-  tasks-check:
+  extract-pr-number:
     if: (github.event.issue.pull_request != null && github.event_name == 'issue_comment') || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Extract PR number
         id: extract-pr
         run: echo "::set-output name=pr_number::$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")"
-        if: github.event_name == 'issue_comment'
 
-      - name: Check tasks
-        uses: ./.github/workflows/tasks-check.yaml
-        continue-on-error: true
+  tasks-check:
+    if: (github.event.issue.pull_request != null && github.event_name == 'issue_comment') || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check checkboxes
+      uses: mheap/require-checklist-action@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        issueNumber: ${{ steps.extract-pr.outputs.pr_number }}
 
+  update-pr-checks:
+    if: (github.event.issue.pull_request != null && github.event_name == 'issue_comment') || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
       - name: Create or Update Check
         uses: actions/github-script@v4
         with:
