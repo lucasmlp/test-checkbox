@@ -11,6 +11,8 @@ on:
 
 jobs:
   review-checklist:
+    name: Make validation comment on PR
+    permissions: write-all
     uses: ./.github/workflows/review-checklist.yaml
 
   tasks-check:

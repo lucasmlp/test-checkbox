@@ -5,7 +5,6 @@ on:
 
 jobs:
   review-checklist:
-    permissions: write-all
     name: Make validation comment on PR
     runs-on: ubuntu-latest
     steps:
