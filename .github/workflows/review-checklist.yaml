@@ -13,6 +13,7 @@ jobs:
     permissions: write-all
     steps:
       - name: Make validation comment
+        permissions: write-all
         uses: actions/github-script@v4
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
