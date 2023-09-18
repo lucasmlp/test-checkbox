@@ -1,73 +1,12 @@
-name: PR Comment Checkbox Check
+name: Require Checklist
 
 on:
-  issue_comment:
-    types: [edited]
+ pull_request_review:
+    types: [submitted, approved]
+
 
 jobs:
-  checkbox-check:
-    # Ensure the edited comment is on a PR and not just an issue
-    if: github.event.issue.pull_request != null
-    runs-on: ubuntu-latest
-    steps:
-    - name: Extract PR number
-      id: extract-pr
-      run: echo "::set-output name=pr_number::$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")"
-
-    - name: Check checkboxes
-      id: checklist-check
-      uses: mheap/require-checklist-action@v2
-      with:
-        issueNumber: ${{ steps.extract-pr.outputs.pr_number }}
-      continue-on-error: true # To ensure the next step executes even if this one fails
-
-    - name: Update PR check
-      uses: actions/github-script@v4
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const prNumber = ${{ steps.extract-pr.outputs.pr_number }};
-          
-          // Fetch PR details
-          const prData = await github.pulls.get({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: prNumber
-          });
-
-          const sha = prData.data.head.sha;
-          const conclusion = "${{ steps.checklist-check.outcome }}" === 'success' ? 'success' : 'failure';
-          const output = {
-            title: 'Checkbox Check Result',
-            summary: conclusion === 'success' ? 'All checkboxes are checked' : 'Some checkboxes are unchecked'
-          };
-          
-          // Check if a check run with the specified name already exists
-          const { data: checkRuns } = await github.checks.listForRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: sha,
-            check_name: 'Checkbox Check'
-          });
-
-          // If the check run exists, update it; otherwise, create a new one
-          if (checkRuns.check_runs.length > 0) {
-            await github.checks.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              check_run_id: checkRuns.check_runs[0].id,
-              status: 'completed',
-              conclusion: conclusion,
-              output: output
-            });
-          } else {
-            await github.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'Checkbox Check',
-              head_sha: sha,
-              status: 'completed',
-              conclusion: conclusion,
-              output: output
-            });
-          }
+  tasks-check:
+    name: Check tasks
+    needs: review-checklist
+    uses: ./.github/workflows/tasks-check.yaml
