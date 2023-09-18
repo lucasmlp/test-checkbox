@@ -1,47 +1,58 @@
-name: Tasks Check Trigger
+name: PR Comment Checkbox Check
 
 on:
   issue_comment:
     types: [edited]
 
 jobs:
-  extract-pr-number:
-    if: (github.event.issue.pull_request != null && github.event_name == 'issue_comment') || github.event_name == 'pull_request'
+  checkbox-check:
+    # Ensure the edited comment is on a PR and not just an issue
+    if: github.event.issue.pull_request != null
     runs-on: ubuntu-latest
     steps:
-      - name: Extract PR number
-        id: extract-pr
-        run: echo "::set-output name=pr_number::$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")"
+    - name: Extract PR number
+      id: extract-pr
+      run: echo "::set-output name=pr_number::$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")"
 
-  tasks-check:
-    if: (github.event.issue.pull_request != null && github.event_name == 'issue_comment') || github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
     - name: Check checkboxes
       id: checklist-check
       uses: mheap/require-checklist-action@v2
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
         issueNumber: ${{ steps.extract-pr.outputs.pr_number }}
+      continue-on-error: true # To ensure the next step executes even if this one fails
 
-  update-pr-checks:
-    if: (github.event.issue.pull_request != null && github.event_name == 'issue_comment') || github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create or Update Check
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            console.log(`Event Name: ${context}`);
-            const sha = context.eventName === 'pull_request' ? context.payload.pull_request.head.sha : context.payload.issue.pull_request.head.sha;
-            console.log(`SHA: ${sha}`);
-            const conclusion = "${{ steps.checklist-check.outcome }}" === 'success' ? 'success' : 'failure';
-            const output = {
-              title: 'Checkbox Check Result',
-              summary: conclusion === 'success' ? 'All checkboxes are checked' : 'Some checkboxes are unchecked'
-            };
-            
+    - name: Update PR check
+      uses: actions/github-script@v4
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const prNumber = ${{ steps.extract-pr.outputs.pr_number }};
+          const sha = context.payload.issue.pull_request.head.sha;
+          const conclusion = "${{ steps.checklist-check.outcome }}" === 'success' ? 'success' : 'failure';
+          const output = {
+            title: 'Checkbox Check Result',
+            summary: conclusion === 'success' ? 'All checkboxes are checked' : 'Some checkboxes are unchecked'
+          };
+          
+          // Check if a check run with the specified name already exists
+          const { data: checkRuns } = await github.checks.listForRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: sha,
+            check_name: 'Checkbox Check'
+          });
+
+          // If the check run exists, update it; otherwise, create a new one
+          if (checkRuns.check_runs.length > 0) {
+            await github.checks.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              check_run_id: checkRuns.check_runs[0].id,
+              status: 'completed',
+              conclusion: conclusion,
+              output: output
+            });
+          } else {
             await github.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -51,3 +62,4 @@ jobs:
               conclusion: conclusion,
               output: output
             });
+          }
