@@ -27,7 +27,15 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const prNumber = ${{ steps.extract-pr.outputs.pr_number }};
-          const sha = context.payload.issue.pull_request.head.sha;
+          
+          // Fetch PR details
+          const prData = await github.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: prNumber
+          });
+
+          const sha = prData.data.head.sha;
           const conclusion = "${{ steps.checklist-check.outcome }}" === 'success' ? 'success' : 'failure';
           const output = {
             title: 'Checkbox Check Result',
