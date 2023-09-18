@@ -1,10 +1,6 @@
 name: Tasks Check
 
 on:
-  workflow_call:
-  pull_request:
-    types: 
-      - opened
   pull_request_review:
     types: 
       - submitted
