@@ -8,5 +8,4 @@ on:
 jobs:
   tasks-check:
     name: Check tasks
-    needs: review-checklist
     uses: ./.github/workflows/tasks-check.yaml

@@ -2,11 +2,17 @@ name: Require Checklist
 
 on:
   pull_request:
-    types: opened
-
+    types: 
+      - opened
+  pull_request_review:
+    types:
+      - submitted
+      - approved
 
 jobs:
   review-checklist:
+    # Only run this job if the workflow was triggered by a pull request being opened
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
     permissions: write-all
     name: Make validation comment on PR
     runs-on: ubuntu-latest
