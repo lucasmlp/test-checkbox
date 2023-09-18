@@ -33,6 +33,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            console.log(`Event Name: ${context}`);
             const sha = context.eventName === 'pull_request' ? context.payload.pull_request.head.sha : context.payload.issue.pull_request.head.sha;
             console.log(`SHA: ${sha}`);
             const conclusion = "${{ steps.checklist-check.outcome }}" === 'success' ? 'success' : 'failure';
